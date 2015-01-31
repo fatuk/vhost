@@ -1,0 +1,128 @@
+#!/bin/bash
+#
+
+# Display usage info
+vhost-usage() {
+cat <<"USAGE"
+Usage: vhost [OPTIONS] <name>
+	-h|--help	this screen
+	-pub		to create the webhost root in ~/www/name/public/
+	-url 		to specify a local address, default is http://name.local
+	-rm 		to remove a previously created vhost, see examples
+	-d 		    to specify the webroot directory location, default is in ~/www (NO TRAILING SLASH)
+	-email 		to specify the email of the administrator in the virtual host file
+	-l 			to list the current virtual hosts
+
+IMPORTANT Notes:
+1- You need git setup to grab the template file if you do not have it already.
+2- You need to make sure you do not have a vhost called 'template' or that it is the one from this gist: https://gist.github.com/gistwebdev/5640113
+3- Check your version of sed, you need to make sure -i works. GNU sed is suggested.
+
+Examples:
+vhost mysite        						this will create a new apache2 vhost named mysite with a webroot of ~/www/mysite/ reachable at http://mysite.local
+vhost -pub mysite        					this will create a new apache2 vhost named mysite with a webroot of ~/www/mysite/public/ reachable at http://mysite.local
+vhost -d ~/sites/mysite/myroot -url dev.mysite.dev mysite 	this will create a new apache2 vhost named mysite with a webroot of ~/sites/mysite/myroot reachable at http://dev.mysite.dev
+vhost -rm mysite.local mysite 				this will remove the apache2 vhost named mysite and remove the mysite.local entry from the /etc/hosts file. Be sure to specify boths
+USAGE
+exit 0
+}
+
+# Delete a virtual host file and it's entry in /etc/hosts
+vhost-remove() {
+	sudo -v
+	echo "Removing $url from /etc/hosts."
+	sudo sed -i '/'$url'/d' /etc/hosts
+
+	echo "Disabling and deleting the $name virtual host."
+	sudo a2dissite $name
+	sudo rm /etc/apache2/sites-available/$name.conf
+	sudo service apache2 reload
+	exit 0
+}
+
+vhost-list() {
+	echo ""
+	echo "******************************************************"
+	echo "Available virtual hosts:"
+	ls /etc/apache2/sites-available/ | grep -v -E "template" | wc -l
+	echo "------------------------------------------------------"
+	ls /etc/apache2/sites-available/ | grep -v -E "template" | tr '\n' '\n'
+	echo ""
+	echo ""
+	echo "******************************************************"
+	echo "Enabled virtual hosts:"
+	ls /etc/apache2/sites-enabled/ | wc -l
+	echo "------------------------------------------------------"
+	ls /etc/apache2/sites-enabled/ | grep -v -E "template" | tr '\n' '\n'
+	echo ""
+	echo ""
+	exit 0
+}
+
+# Define and create default values
+name="${!#}"
+email="webmaster@localhost"
+url="$name.loc"
+webroot="$HOME/www/$name"
+
+
+# Check if git is installed
+if ! hash git 2>/dev/null; then
+    echo -e "Git is not installed! You will need it at some point anyways..."
+    echo -e "Exiting, install git first."
+    exit 0
+fi
+
+# Loop to read options and arguments
+while [ $1 ]; do
+    case "$1" in
+    	'-l') vhost-list;;
+		'-h'|'--help') vhost-usage;;
+        '-rm') url="$2"
+			   vhost-remove;;
+        '-pub') webroot="$HOME/www/$name/public";;
+        '-d') webroot="$2";;
+        '-url') url="$2";;
+		'-email') email="$2";;
+    esac
+    shift
+done
+
+sudo -v
+
+# Check if the webroot exists
+if [ ! -d "$webroot" ]; then
+	echo "Creating $webroot directory"
+	mkdir -p $webroot
+fi
+
+echo "Checking for the virtual host template file..."
+
+if [ ! -f /etc/apache2/sites-available/template ]; then
+    echo "Downloading template file with Git..."
+
+	sudo git clone https://gist.github.com/f3c929e9d7b2bbb96d9a.git /etc/apache2/sites-available/temp
+
+	sudo mv /etc/apache2/sites-available/temp/template /etc/apache2/sites-available/template
+
+	sudo rm -Rf /etc/apache2/sites-available/temp
+fi
+
+echo "Creating the new $name virtual host file that has a webroot of: $webroot"
+
+sudo cp /etc/apache2/sites-available/template /etc/apache2/sites-available/$name.conf
+sudo sed -i 's/template.email/'$email'/g' /etc/apache2/sites-available/$name.conf
+sudo sed -i 's/template.url/'$url'/g' /etc/apache2/sites-available/$name.conf
+sudo sed -i 's#template.webroot#'$webroot'#g' /etc/apache2/sites-available/$name.conf
+
+echo "Adding $url to the /etc/hosts file..."
+
+sudo sed -i '1s/^/127.0.0.1       '$url'\n/' /etc/hosts
+
+sudo a2ensite $name
+
+sudo service apache2 reload
+
+echo "Virtual host $name created with a webroot at $webroot reachable from http://$url"
+
+exit 0
