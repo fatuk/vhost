@@ -37,7 +37,7 @@ Check it out `vhost -h`.
 2. You need to make sure you do not have a vhost called **'template'** or that it is the one from this gist: https://gist.github.com/f3c929e9d7b2bbb96d9a
 3. Check your version of **sed**, you need to make sure -i works. GNU sed is suggested.
 
-## Thanks
+## Thanks to [this](https://coderwall.com/p/cqoplg/bash-script-to-create-new-apache2-virtual-hosts) article.
 
 This is my fork of [gistwebdev](https://gist.github.com/gistwebdev)
 
