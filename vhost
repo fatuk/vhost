@@ -68,24 +68,24 @@ webroot="$HOME/www/$name"
 
 # Check if git is installed
 if ! hash git 2>/dev/null; then
-    echo -e "Git is not installed! You will need it at some point anyways..."
-    echo -e "Exiting, install git first."
-    exit 0
+	echo -e "Git is not installed! You will need it at some point anyways..."
+	echo -e "Exiting, install git first."
+	exit 0
 fi
 
 # Loop to read options and arguments
 while [ $1 ]; do
-    case "$1" in
-    	'-l') vhost-list;;
+	case "$1" in
+		'-l') vhost-list;;
 		'-h'|'--help') vhost-usage;;
-        '-rm') url="$2"
+		'-rm') url="$2"
 			   vhost-remove;;
-        '-pub') webroot="$HOME/www/$name/public";;
-        '-d') webroot="$2";;
-        '-url') url="$2";;
+		'-pub') webroot="$HOME/www/$name/public";;
+		'-d') webroot="$2";;
+		'-url') url="$2";;
 		'-email') email="$2";;
-    esac
-    shift
+	esac
+	shift
 done
 
 sudo -v
@@ -99,7 +99,7 @@ fi
 echo "Checking for the virtual host template file..."
 
 if [ ! -f /etc/apache2/sites-available/template ]; then
-    echo "Downloading template file with Git..."
+	echo "Downloading template file with Git..."
 
 	sudo git clone https://gist.github.com/f3c929e9d7b2bbb96d9a.git /etc/apache2/sites-available/temp
 
