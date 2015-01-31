@@ -9,15 +9,16 @@ Check it out `vhost -h`.
 
 ## Available options:
 
-| option               | description                                                                        |
-| :------------------- | :------                                                                            |
-| `-h`                 | help screen                                                                        |
-| `-pub`               | to create the webhost root in ~/www/name/public/                                   |
-| `-url`               | to specify a local address, default is http://name.loc                             |
-| `-rm`                | to remove a previously created vhost, see examples                                 |
-| `-d`                 | to specify the webroot directory location, default is in ~/www (NO TRAILING SLASH) |
-| `-email`             | to specify the email of the administrator in the virtual host file                 |
-| `-l`                 | to list the current virtual hosts                                                  |
+| option               | description                                                                          |
+| :------------------- | :------                                                                              |
+| `-h`                 | help screen                                                                          |
+| `-pub`               | to create the webhost root in `~/www/name/public/`                                   |
+| `-url`               | to specify a local address, default is `http://name.loc`                             |
+| `-rm`                | to remove a previously created vhost, see examples                                   |
+| `-d`                 | to specify the webroot directory location, default is in `~/www` (NO TRAILING SLASH) |
+| `-email`             | to specify the email of the administrator in the virtual host file                   |
+| `-l`                 | to list the current virtual hosts                                                    |
+
 
 
 ## Examples:
